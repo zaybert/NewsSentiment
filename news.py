@@ -20,6 +20,8 @@ sentiment_model = pipeline(
 # Requesting website
 # URL_web = input("Enter URL: ")
 
+# This is Ryan
+
 
 #creating window for scraper
 root = tk.Tk()
