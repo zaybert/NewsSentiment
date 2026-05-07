@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import tkinter as tk
 import csv
 import os
+import time #prevent rate limits
 
 # Allowed sites
 # https://www.bbc.com/business
@@ -19,9 +20,14 @@ root.title("News Sentiment")
 root.geometry("800x800")
 
 #input box
-titleURL_label = tk.Label(root, text="Enter News URL (USE BBC, CNN, NPR links)")
+titleURL_label = tk.Label(root, text="Enter News URL (USE BBC, CNN, NPR links). Make sure you have https://")
 titleURL_label.pack()
-url_entry = tk.Entry(root, width=50,)
+#url_entry = tk.Entry(root, width=50,)
+#url_entry.pack(pady=10)
+
+#trying multiple links
+
+url_entry= tk.Text(root, height=5, width=70)
 url_entry.pack(pady=10)
 
 #output box
@@ -33,27 +39,32 @@ headlines_list = [] #headline list to store from websites
 def scrape():
     global headlines_list
     headlines_list = []
-    url = url_entry.get().strip()
+
+    raw_urls = url_entry.get("1.0", tk.END).strip()
+    urls = raw_urls.splitlines()
 
     headers = {"User-Agent": "Mozilla/5.0"}
 
-    try:
-        response = requests.get(url, headers=headers)
+    output.delete("1.0", tk.END)
 
-        soup = BeautifulSoup(response.content, 'html.parser')
-        headlines = soup.find_all('h1')
+    for url in urls:
+        url = url.strip()
 
-        output.delete("1.0", tk.END)
-        
+        try:
+            response = requests.get(url, headers=headers)
 
-        for h in headlines:
-            text = h.text.strip()
-            headlines_list.append(text)
-            output.insert(tk.END, h.text.strip() + "\n\n")
+            soup = BeautifulSoup(response.content, 'html.parser')
+            headlines = soup.find_all('h1')
 
-    except Exception as e:
-        output.delete("1.0", tk.END)
-        output.insert(tk.END, f"Error: {e}")
+            for h in headlines:
+                text = h.text.strip()
+                headlines_list.append((url, text))
+                output.insert(tk.END, text + "\n\n")
+                
+            time.sleep(2)
+
+        except Exception as e:
+            output.insert(tk.END, f"Error with {url}: {e}\n\n")
         
 def export_csv():
     try:
@@ -61,10 +72,10 @@ def export_csv():
 
         with open(file_path, "w", newline="", encoding="utf-8") as file:
             writer = csv.writer(file)
-            writer.writerow(["Headline"])
+            writer.writerow(["URL", "Headline"])
 
-            for item in headlines_list:
-                writer.writerow([item])
+            for url, item in headlines_list:
+                writer.writerow([url, item])
 
         status_label.config(
             text=f"Export successful! Saved to:\n{file_path}",
