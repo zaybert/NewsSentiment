@@ -67,6 +67,7 @@ def scrape():
                 for h in headlines:
                     text = h.text.strip()
 
+                    #refactor for model
                     result = sentiment_model(text)[0]
                     raw_label = result["label"] # pulling from huggingface LM
                     label = convert_label(raw_label) # converting
@@ -127,6 +128,7 @@ def show_results():
         output.tag_config(color, foreground=color)
         
 def convert_label(label): #Mapping labels for the huggingface LM
+    # refactor this code to account for new LM
     mapping = {
         "LABEL_0": "negative",
         "LABEL_1": "neutral",
