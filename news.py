@@ -22,6 +22,8 @@ sentiment_model = pipeline(
 
 # This is Ryan
 
+# link to hugging face LM
+# https://huggingface.co/FISA-conclave/klue-roberta-news-sentiment
 
 #creating window for scraper
 root = tk.Tk()
