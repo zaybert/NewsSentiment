@@ -17,27 +17,22 @@ pipe = pipeline(
 # https://www.cnn.com/business
 # https://www.npr.org/sections/business/
 
-# Requesting website
-# URL_web = input("Enter URL: ")
-
-# This is Ryan
-
-# link to hugging face LM
-# https://huggingface.co/FISA-conclave/klue-roberta-news-sentiment
+#         #
+# GUI BOX #
+#         #
 
 #creating window for scraper
 root = tk.Tk()
 root.title("News Sentiment")
 root.geometry("800x800")
 
+
 #input box
 titleURL_label = tk.Label(root, text="Enter News URL (USE BBC, CNN, NPR links). Make sure you have https://")
 titleURL_label.pack()
-#url_entry = tk.Entry(root, width=50,)
-#url_entry.pack(pady=10)
+
 
 #trying multiple links
-
 url_entry= tk.Text(root, height=5, width=70)
 url_entry.pack(pady=10)
 
@@ -47,6 +42,8 @@ output.pack(pady=10)
 
 headlines_list = [] #headline list to store from websites
 
+
+#scrapes headline from website
 def scrape():
     global headlines_list
     headlines_list = []
@@ -88,6 +85,7 @@ def scrape():
         except Exception as e:
             output.insert(tk.END, f"Error with {url}: {e}\n\n")
         
+#exports into csv
 def export_csv():
     try:
         file_path = os.path.abspath("headlines.csv")
@@ -110,6 +108,8 @@ def export_csv():
             fg="red"
         )
         
+        
+
 def show_results():
     output.delete("1.0", tk.END)
 
@@ -145,18 +145,9 @@ def convert_label(label): #Mapping labels for the huggingface LM
     }
     return mapping.get(label, label)
 
-#headers = {"User-Agent": "Mozilla/5.0"}
-#response = requests.get(URL_web, headers=headers)
-#print("The response code is : ", response)
 
-#Parsing HTML Document
-#soup=BeautifulSoup(response.content,'html.parser')
-
-#Extract headline
-#headlines=soup.find_all('h1')
-#for headline in headlines:
-#    print(headline.text, "\n")
-    
+# BOTTOM BUTTONS #    
+    # # # # #
 export_button = tk.Button(root, text="Export CSV", command=export_csv)
 export_button.pack()
 
