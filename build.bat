@@ -5,6 +5,7 @@ rmdir /s /q build
 rmdir /s /q dist
 
 echo Building exe...
+echo Press command+C or ctrl+C to abort download
 
 python -m PyInstaller --onefile --windowed ^
 --hidden-import=requests ^
