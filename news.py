@@ -7,9 +7,9 @@ import time #prevent rate limits
 
 from transformers import pipeline
 
-sentiment_model = pipeline(
-    "sentiment-analysis",
-    model="ozanba/news_sentiment_stock"
+pipe = pipeline(
+    "text-classification",
+    model="shashanksrinath/News_Sentiment_Analysis"
 )
 
 # Allowed sites
@@ -63,25 +63,26 @@ def scrape():
 
         try:
             response = requests.get(url, headers=headers)
+            soup = BeautifulSoup(response.content, "html.parser")
 
-            soup = BeautifulSoup(response.content, 'html.parser')
-            headlines = soup.find_all('h1')
+            headlines = soup.find_all("h1")
 
             for h in headlines:
-                for h in headlines:
-                    text = h.text.strip()
+                text = h.text.strip()
 
-                    #refactor for model
-                    result = sentiment_model(text)[0]
-                    raw_label = result["label"] # pulling from huggingface LM
-                    label = convert_label(raw_label) # converting
-                    score = result["score"]
-                    result = sentiment_model(text)[0]
+                if not text:
+                    continue
 
-                    headlines_list.append((url, text, label, score))
-                    
+                result = pipe(text)[0]  # run model FIRST
+
+                raw_label = result["label"]
+                label = convert_label(raw_label)
+                score = result["score"]
+
+                headlines_list.append((url, text, label, score))
+
                 output.insert(tk.END, text + "\n\n")
-                
+
             time.sleep(2)
 
         except Exception as e:
@@ -114,7 +115,8 @@ def show_results():
 
     for url, text, label, score in headlines_list:
 
-        # choose color
+        confidence = score * 100  # convert to percent
+
         if label.lower() == "positive":
             color = "green"
         elif label.lower() == "negative":
@@ -122,11 +124,14 @@ def show_results():
         else:
             color = "orange"
 
-        output.insert(tk.END, f"{url}\n{text}\n{label} ({score:.2f})\n\n")
+        start_index = output.index(tk.END)
 
-        # apply color to last inserted block
-        start_index = output.index("end-3l linestart")
-        end_index = output.index("end-1l lineend")
+        output.insert(
+            tk.END,
+            f"{url}\n{text}\n{label} — confidence: {confidence:.1f}%\n\n"
+        )
+
+        end_index = output.index(tk.END)
 
         output.tag_add(color, start_index, end_index)
         output.tag_config(color, foreground=color)
